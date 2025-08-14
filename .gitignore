@@ -1,4 +1,4 @@
+# Ignorar credenciales sensibles
+secrets/firebase_credentials.json
 .env
-secrets/
 __pycache__/
-*.pyc
