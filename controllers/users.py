@@ -1,10 +1,12 @@
+import base64
+import json
 import os
 import logging
 import firebase_admin
 import requests
 from fastapi import HTTPException, status
 from firebase_admin import credentials, auth as firebase_auth
-from bson import ObjectId
+from bson import ObjectId, decode
 
 from models.users import User
 from models.login import Login
@@ -22,6 +24,37 @@ if not firebase_admin._apps:
 
     cred = credentials.Certificate(firebase_cred_path)
     firebase_admin.initialize_app(cred)
+
+
+def initialize_firebase():
+    
+    if firebase_admin._apps:
+        return
+
+    try:
+     
+        firebase_creeds_base64 = None  
+        if firebase_creeds_base64:
+            firebase_creeds_bytes = base64.b64decode(firebase_creeds_base64)
+            firebase_creeds_json = firebase_creeds_bytes.decode('utf-8')
+            firebase_creeds = json.loads(firebase_creeds_json)
+            cred = credentials.Certificate(firebase_creeds)
+            firebase_admin.initialize_app(cred)
+            logger.info("Firebase initialized with environment variable credentials")
+        else:
+           
+            cred = credentials.Certificate("secrets/firebase_credentials.json")
+            firebase_admin.initialize_app(cred)
+            logger.info("Firebase initialized with JSON file")
+
+    except Exception as e:
+        logger.error(f"Error initializing Firebase: {str(e)}")
+        raise HTTPException(status_code=500, detail="Error al inicializar Firebase")
+
+
+initialize_firebase()
+
+
 
 # Crear usuario
 async def create_user(user: User) -> User:
