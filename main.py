@@ -1,13 +1,10 @@
-import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-import firebase_admin
-from firebase_admin import credentials
+import logging
 
 from routes.contracts import router as contracts_router
 from routes.contracts_types import router as contract_types_router
 from routes.users import router as users_router, login_router
-
 
 app = FastAPI(
     title="API Proyecto Final",
@@ -15,11 +12,10 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# Configuración CORS 
+# Configuración CORS
 origins = [
     "http://localhost",
-    "http://localhost:3000",  
-   
+    "http://localhost:3000",
 ]
 
 app.add_middleware(
@@ -39,50 +35,30 @@ app.include_router(login_router)
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-@app.get("/")
-def read_root():
-    return {"status": "healthy", "version": "0.0.0", "service": "API Proyecto Final"}
-
-app.get("/health")
-def health_check():
-    try:
-        return { 
-            "status": "healthy",
-            "timestamp": "2025-01-31",
-            "service": "API Proyecto Final",
-            "environment": "production"
-        }
-    except Exception as e:
-        return {"status": "unhealthy", "error": str(e)}
-    
-@app.get("/ready")
-def readiness_check():
-    try:
-           from utils.mongobd import test_connection
-           db_status = test_connection()
-           return {
-               "status": "ready" if db_status else "not ready",
-               "database": "connected" if db_status else "disconnected",
-               "service": "API Proyecto Final",
-        }
-    except Exception as e:
-        return {"status": "unhealthy", "error": str(e)}
-
-
-@app.on_event("startup")
-async def startup_db_client():
-  
-    
-    pass
-
-
-@app.on_event("shutdown")
-async def shutdown_db_client():
-
-    pass
-
-
+# Root endpoint
 @app.get("/", tags=["Root"])
 async def root():
     return {"message": "API Proyecto Final funcionando"}
 
+# Health endpoint
+@app.get("/health", tags=["Health"])
+async def health_check():
+    return { 
+        "status": "healthy",
+        "service": "API Proyecto Final",
+        "environment": "production"
+    }
+
+# Readiness endpoint
+@app.get("/ready", tags=["Health"])
+async def readiness_check():
+    try:
+        from utils.mongodb import test_connection
+        db_status = test_connection()
+        return {
+            "status": "ready" if db_status else "not ready",
+            "database": "connected" if db_status else "disconnected",
+            "service": "API Proyecto Final",
+        }
+    except Exception as e:
+        return {"status": "unhealthy", "error": str(e)}
