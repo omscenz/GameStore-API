@@ -3,6 +3,7 @@ import json
 import os
 import logging
 import firebase_admin
+import base64
 import requests
 from fastapi import HTTPException, status
 from firebase_admin import credentials, auth as firebase_auth
@@ -32,8 +33,7 @@ def initialize_firebase():
         return
 
     try:
-     
-        firebase_creeds_base64 = None  
+        firebase_creeds_base64 = os.getenv("FIREBASE_CREDENTIALS_BASE_64")
         if firebase_creeds_base64:
             firebase_creeds_bytes = base64.b64decode(firebase_creeds_base64)
             firebase_creeds_json = firebase_creeds_bytes.decode('utf-8')
