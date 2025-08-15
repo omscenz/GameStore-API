@@ -77,7 +77,14 @@ jobs:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
         run: |
           echo "Starting deployment..."
-          railway up --service "videojuego-api"
+          railway up --service "videojuego-api" || \
+          railway up --service videojuego-api || \
+          railway up --service web || \
+          railway up --service api || \
+          railway up --service app || \
+          railway up --service videojuego-api || \
+          railway up --service videojuego || \
+          railway up --service backend || \
 
       - name: Health check
         env:
