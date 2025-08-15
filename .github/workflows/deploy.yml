@@ -54,13 +54,14 @@ jobs:
 
       - name: Install Railway CLI
         run: |
-          curl -sSfL https://railway.app/install.sh | sh || {
-            echo "Primer intento fallido, usando método alternativo..."
-            curl -L https://github.com/railwayapp/cli/releases/latest/download/railway-linux-x86_64.tar -o railway.tar.gz
-            tar -xzf railway.tar.gz
-            sudo mv railway /usr/local/bin/
-            chmod +x /usr/local/bin/railway
-          }
+         # Método oficial con retry
+         curl -sSfL https://railway.app/install.sh | sh || {
+         echo "Primer intento fallido, usando método alternativo..."
+         curl -L https://github.com/railwayapp/cli/releases/latest/download/railway-linux-x86_64 -o railway
+         chmod +x railway
+         sudo mv railway /usr/local/bin/
+         }
+
 
       - name: Add Railway CLI to PATH
         run: |
@@ -85,7 +86,7 @@ jobs:
 
       - name: Health check
         env:
-          SERVICE_URL: ${{ secrets.RAILWAY_SERVICE_URL }}  # URL pública de tu servicio
+          SERVICE_URL: ${{ secrets.RAILWAY_SERVICE_URL }} 
         run: |
           echo "Checking /health endpoint..."
           for i in {1..10}; do
