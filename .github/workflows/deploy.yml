@@ -80,8 +80,13 @@ jobs:
         run: |
           echo "Starting deployment..."
           railway up --service "videojuego-api" || \
-          railway up --service "api" || \
-          railway up --service "web" || \
+          railway up --service videojuego-api || \
+          railway up --service api || \
+          railway up --service web || \
+          railway up --service app || \
+          railway up --service videojuego-api || \
+          railway up --service videojuego || \
+          railway up --service backend || \
           (echo "No service found, creando uno nuevo..." && railway up)
 
       - name: Health check
