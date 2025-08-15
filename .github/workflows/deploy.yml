@@ -27,7 +27,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-          pip install pytest
+          pip install pytest requests
 
       - name: Test FastAPI
         env:
@@ -54,7 +54,6 @@ jobs:
 
       - name: Install Railway CLI
         run: |
-          # Método oficial con retry
           curl -sSfL https://railway.app/install.sh | sh || {
             echo "Primer intento fallido, usando método alternativo..."
             curl -L https://github.com/railwayapp/cli/releases/latest/download/railway-linux-x86_64.tar -o railway.tar.gz
@@ -83,3 +82,20 @@ jobs:
           railway up --service "api" || \
           railway up --service "web" || \
           (echo "No service found, creando uno nuevo..." && railway up)
+
+      - name: Health check
+        env:
+          SERVICE_URL: ${{ secrets.RAILWAY_SERVICE_URL }}  # URL pública de tu servicio
+        run: |
+          echo "Checking /health endpoint..."
+          for i in {1..10}; do
+            status=$(curl -s -o /dev/null -w "%{http_code}" $SERVICE_URL/health)
+            echo "Attempt $i: status=$status"
+            if [ "$status" == "200" ]; then
+              echo "Service is healthy!"
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "Service failed health check"
+          exit 1
