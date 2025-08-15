@@ -72,12 +72,6 @@ jobs:
         run: |
           railway --version || railway version || echo "Railway CLI installation failed"
 
-      - name: Link Railway project
-        env:
-          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
-        run: |
-          railway link --project "videojuego-api" --environment "production"
-
       - name: Deploy to Railway
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
