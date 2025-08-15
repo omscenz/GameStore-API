@@ -2,6 +2,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import logging
 
+import uvicorn
+
 from routes.contracts import router as contracts_router
 from routes.contracts_types import router as contract_types_router
 from routes.users import router as users_router, login_router
@@ -62,3 +64,8 @@ async def readiness_check():
         }
     except Exception as e:
         return {"status": "unhealthy", "error": str(e)}
+    
+if __name__ == "__main__":
+    import os
+    port = int(os.environ.get("PORT", 8000))  # Railway define la variable PORT
+    uvicorn.run(app, host="0.0.0.0", port=port)
