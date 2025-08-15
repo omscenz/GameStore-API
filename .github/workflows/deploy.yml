@@ -44,45 +44,42 @@ jobs:
     needs: test   
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
-
-
     steps:
-    - uses: actions/setup-node@v4
-    - name: Install Railway CLI
-      run: |
-        # Use the official Railway CLI installation method with retry
-        curl -sSfL https://railway.app/install.sh | sh || {
-        echo "First install attempt failed, trying retrying method..."
-        curl -L https://github.com/railwayapp/cli/releases/latest/download/railway-linux-x86_64.tar
-        tar -xzf railway.tar.gz
-        sudo mv railway /usr/local/bin/
-        chmod +x /usr/local/bin/railway
-        }
+      - uses: actions/checkout@v4
 
-        # Add to PATH if using first method
-        if [ -d "$HOME/.railway/bin" ]; then
-        echo "$HOME/.railway/bin" >> $GITHUB_PATH
-        export PATH="$HOME/.railway/bin:$PATH "
-        fi
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
 
-        # Verify installation
-        railway --version || railway version || echo "Railway CLI installation failed"
-    - name: Deploy to Railway
-      env:
-        RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
-      run: |
-        echo "starting deployment..."
-        railway up --service "videojuego-api" || \
-        railway up --service videojuego-api || \
-        railway up --service web || \
-        railway up --service api || \
-        railway up --service app || \
-        railway up --service videojuego-api || \
-        railway up --service videojuego || \
-        railway up --service backened || \
-        (echo "creating new service and deploying" && railway up)
-        
-        
-        
-    
-        
+      - name: Install Railway CLI
+        run: |
+          # Método oficial con retry
+          curl -sSfL https://railway.app/install.sh | sh || {
+            echo "Primer intento fallido, usando método alternativo..."
+            curl -L https://github.com/railwayapp/cli/releases/latest/download/railway-linux-x86_64.tar -o railway.tar.gz
+            tar -xzf railway.tar.gz
+            sudo mv railway /usr/local/bin/
+            chmod +x /usr/local/bin/railway
+          }
+
+      - name: Add Railway CLI to PATH
+        run: |
+          if [ -d "$HOME/.railway/bin" ]; then
+            echo "$HOME/.railway/bin" >> $GITHUB_PATH
+            export PATH="$HOME/.railway/bin:$PATH"
+          fi
+
+      - name: Verify Railway CLI installation
+        run: |
+          railway --version || railway version || echo "Railway CLI installation failed"
+
+      - name: Deploy to Railway
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+        run: |
+          echo "Starting deployment..."
+          railway up --service "videojuego-api" || \
+          railway up --service "api" || \
+          railway up --service "web" || \
+          (echo "No service found, creando uno nuevo..." && railway up)
