@@ -85,6 +85,7 @@ jobs:
           railway up --service videojuego-api || \
           railway up --service videojuego || \
           railway up --service backend || \
+          echo "No service matched, creating a new one..." && railway up
 
       - name: Health check
         env:
